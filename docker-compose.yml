@@ -1,0 +1,36 @@
+﻿services:
+  web:
+    build: .
+    container_name: p7_web
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: hola_mundo
+      DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: p7_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: hola_mundo
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  mysql_data:
